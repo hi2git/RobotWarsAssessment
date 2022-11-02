@@ -11,7 +11,8 @@ namespace RobotWars {
 	public static class Battle {
 
 		public static string Run(string size, string startPos, string instructionLine) {
-			var robot = new Robot(startPos);
+			var moveMgr = new MovementManager(size);
+			var robot = new Robot(moveMgr, startPos);
 			foreach (var instructionLetter in instructionLine) { // TODO: simplify
 				var code = instructionLetter.ToString();
 				var instruction = Enum.TryParse<Instructions>(code, out var ins)
@@ -20,15 +21,52 @@ namespace RobotWars {
 				robot.Execute(instruction);
 			}
 			var result = $"{robot}";
-			//Console.WriteLine(result);
 			return result;
 		}
 
 	}
 
-	public class Robot {
+	public interface IMovementManager {
 
-		public Robot(string startPos) {
+		/// <summary>Returns X coordinate within limitations</summary>
+		/// <returns>X coordinate within limitations</returns>
+		int GetX(int x);
+
+		/// <summary>Returns Y coordinate within limitations</summary>
+		/// <returns>Y coordinate within limitations</returns>
+		int GetY(int y);
+	
+	}
+
+	class MovementManager : IMovementManager {
+
+		public MovementManager(string size) {
+			var coords = size.Split();
+			this.X = int.TryParse(coords[0], out var x) ? x : throw new Exception("Please pass the correct X coordinate of the arena");
+			this.Y = int.TryParse(coords[1], out var y) ? y : throw new Exception("Please pass the correct Y coordinate of the arena");
+		}
+
+		private int X { get; }
+		private int Y { get; }
+
+		/// <inheritdoc/>
+		public int GetX(int x) {
+			var result = Math.Min(x, this.X);
+			return Math.Max(result, 0);
+		}
+
+		/// <inheritdoc/>
+		public int GetY(int y) {
+			var result = Math.Min(y, this.Y);
+			return Math.Max(result, 0);
+		}
+	}
+
+	class Robot {
+		private readonly IMovementManager _moveMgr;
+
+		public Robot(IMovementManager moveMgr, string startPos) {
+			_moveMgr = moveMgr;
 			var coords = startPos.Split(); // TODO: check format
 			this.X = int.TryParse(coords[0], out var x) ? x : throw new Exception("Please pass the correct X coordinate for the robot placement");
 			this.Y = int.TryParse(coords[1], out var y) ? y : throw new Exception("Please pass the correct Y coordinate for the robot placement");
@@ -63,11 +101,13 @@ namespace RobotWars {
 				Directions.W => -1,
 				_ => 0
 			};
+			this.X = _moveMgr.GetX(this.X);
 			this.Y += this.Direction switch {
 				Directions.N => 1,
 				Directions.S => -1,
 				_ => 0,
 			};
+			this.Y = _moveMgr.GetY(this.Y);
 		}
 
 		private void TurnLeft() => this.Direction = this.Direction switch {
