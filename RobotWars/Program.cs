@@ -1,7 +1,16 @@
 ﻿using RobotWars;
 
-Console.WriteLine(Battle.Run("5 5", "1 2 N", "LMLMLMLMM"));
-Console.WriteLine(Battle.Run("5 5", "3 3 E", "MMRMMRMRRM"));
+Console.WriteLine("Please enter the upper-right coordinates of the arena:");
+var size = Console.ReadLine();
+
+Console.WriteLine("Please enter robot initial coordinates");
+var startPos = Console.ReadLine();
+
+Console.WriteLine("Please enter robot instructions");
+var instructionLine = Console.ReadLine();
+
+var result = Battle.Run(size, startPos, instructionLine);
+Console.WriteLine(result);
 
 Console.Write("\r\nPlease press Enter to exit");
 Console.ReadLine();
