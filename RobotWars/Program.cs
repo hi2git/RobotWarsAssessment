@@ -9,8 +9,13 @@ var startPos = Console.ReadLine();
 Console.WriteLine("Please enter robot instructions");
 var instructionLine = Console.ReadLine();
 
-var result = Battle.Run(size, startPos, instructionLine);
-Console.WriteLine(result);
+try {
+	var result = Battle.Run(size, startPos, instructionLine);
+	Console.WriteLine(result);
+}
+catch (Exception ex) {
+	Console.WriteLine(ex.ToString());
+}
 
 Console.Write("\r\nPlease press Enter to exit");
 Console.ReadLine();
